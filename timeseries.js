@@ -41,15 +41,21 @@
     function timeRangePad(dates) {
         var minDate, maxDate, pad;
         if (dates.length > 1) {
-            minDate = moment(_.min(dates));
-            maxDate = moment(_.max(dates));
-            pad = getDatePadding(minDate, maxDate);
-            minDate.subtract(1, pad);
-            maxDate.add(1, pad);
+            minDate = _.min(dates);
+            maxDate = _.max(dates);
+            // pad = getDatePadding(minDate, maxDate);
+            pad = 'months'; // not using the function above 
+            // minDate.subtract(1, pad); // might need to adjust this
+            // maxDate.add(1, pad); // might need to adjust this
         } else {
-            minDate = moment(dates[0]).subtract(1, 'hour');
-            maxDate = moment(dates[0]).add(1, 'hour');
+            // minDate = dates[0].subtract(1, 'hour');
+            // maxDate = dates[0].add(1, 'hour');
         }
+        
+        console.log("minDate: ", minDate)
+    	console.log("maxDate: ", maxDate)
+        console.log("pad: ", pad)
+        
         return {
             'minDate': minDate,
             'maxDate': maxDate,
@@ -78,7 +84,8 @@
 
     function render(classd, spaced, data, enableBrush) {
         
-        var padding = timeRangePad(_.pluck(data, 'value'));
+        var padding = timeRangePad(_.pluck(data, 'issue_year'));
+		console.log("Issue Years: ", _.pluck(data, 'issue_year'))  
 
         var margin = {
             top: 10,
@@ -95,20 +102,16 @@
 
         var ticks = width > 800 ? 8 : 4;
 
-        x.domain(d3.extent([padding.minDate, padding.maxDate]));
+        x.domain(d3.extent(minDate, maxDate));
 
         var xFormat, yFormat;
-        if (lessThanDay(padding.pad)) {
-            xFormat = "%H:%M";
-            yFormat = "%m/%d/%y";
-            y.domain(d3.extent([padding.minDate]));
-        } else {
-            xFormat = "%m/%d/%y";
-            yFormat = "%H:%M";
-            var start = new Date(2012, 0, 1, 0, 0, 0, 0).getTime();
-            var stop = new Date(2012, 0, 1, 23, 59, 59, 59).getTime();
-            y.domain(d3.extent([start, stop]));
-        }
+        
+        xFormat = "%y";
+        yFormat = "%H:%M"; // <-- replace w/ names of editors
+        
+        var start = new Date(2012, 0, 1, 0, 0, 0, 0).getTime();
+        var stop = new Date(2012, 0, 1, 23, 59, 59, 59).getTime();
+        y.domain(d3.extent([start, stop]));
 
         var xAxis = d3.svg.axis().scale(x).orient("bottom")
             .ticks(ticks)
